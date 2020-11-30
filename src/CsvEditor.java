@@ -2,26 +2,28 @@ import com.opencsv.CSVReader;
 import com.opencsv.exceptions.CsvValidationException;
 import javafx.application.Application;
 import javafx.beans.property.SimpleObjectProperty;
-import javafx.beans.property.SimpleStringProperty;
 import javafx.beans.value.ObservableValue;
 import javafx.collections.FXCollections;
 import javafx.collections.ObservableList;
-import javafx.scene.Group;
+import javafx.event.ActionEvent;
+import javafx.event.EventHandler;
+import javafx.geometry.Insets;
 import javafx.scene.Scene;
-import javafx.scene.control.TableColumn;
-import javafx.scene.control.TableView;
+import javafx.scene.control.*;
+import javafx.scene.control.TableColumn.CellEditEvent;
 import javafx.scene.control.cell.PropertyValueFactory;
+import javafx.scene.layout.FlowPane;
 import javafx.scene.layout.VBox;
 import javafx.stage.Stage;
-
-import javafx.event.EventHandler;
-import javafx.scene.control.TableCell;
-import javafx.scene.control.TableColumn.CellEditEvent;
 import javafx.util.Callback;
+import org.o7planning.javafx.model.ComboExtractor;
+import org.o7planning.javafx.model.ComboUrl;
+import org.o7planning.javafx.model.ExtractorList;
 
 import java.io.BufferedReader;
 import java.io.FileReader;
 import java.io.IOException;
+import java.util.Date;
 import java.util.function.Function;
 
 public class CsvEditor extends Application{
@@ -43,10 +45,52 @@ public class CsvEditor extends Application{
 
     @Override
     public void start(Stage stage) throws IOException, CsvValidationException {
+
+        ComboBox<ComboUrl> comboBoxUrl = new ComboBox<ComboUrl>();
+
+        ObservableList<ComboUrl> list1 = ExtractorList.getUrlList();
+
+        comboBoxUrl.setItems(list1);
+        comboBoxUrl.getSelectionModel().select(1);
+
+        ComboBox<ComboExtractor> comboBox = new ComboBox<ComboExtractor>();
+
+        ObservableList<ComboExtractor> list = ExtractorList.getExtractorList();
+
+        comboBox.setItems(list);
+        comboBox.getSelectionModel().select(1);
+
+        FlowPane root = new FlowPane();
+        //FlowPane root1 = new FlowPane();
+        //FlowPane root2 = new FlowPane();
+        root.setPadding(new Insets(10));
+        root.setHgap(5);
+
+        /*root1.setPadding(new Insets(10));
+        root1.setHgap(5);
+        root2.setPadding(new Insets(10));
+        root2.setHgap(5);
+        */
+
+        String styles =
+                "-fx-margin-right: 50px;";
+        Label labelUrl = new Label("Select Url:");
+        labelUrl.setPrefHeight(20);
+        root.getChildren().add(labelUrl);
+        Label labelExtract = new Label("Select Extractor");
+        labelExtract.setStyle(styles);
+        root.getChildren().add(labelExtract);
+        //root2.getChildren().add(new Label("Select Extractor:"));
+        //root1.getChildren().add(comboBox);
+
+        //stage.setTitle("ComboxBox (o7planning.org)");
+        //Scene scene = new Scene(root1, 350, 300);
+        //stage.setScene(scene);
+        //
         readCSV();
         stage.setTitle("CSV Editor");
 
-        Group root = new Group();
+        //Group root = new Group();
         tableView.setEditable(true);
 
         Callback<TableColumn, TableCell> cellFactory = new Callback<TableColumn, TableCell>() {
@@ -79,8 +123,7 @@ public class CsvEditor extends Application{
 //        System.out.println(createArrayValueFactory(Record::getSimpleStringPropertyList, 2));
 
         TableColumn columnF1 = new TableColumn("f1");
-        columnF1.setCellValueFactory(
-                new PropertyValueFactory<>("f0"));
+        columnF1.setCellValueFactory(new PropertyValueFactory<>("f0"));
         columnF1.setCellFactory(cellFactory);
 
         columnF1.setOnEditCommit(new EventHandler<CellEditEvent<Record, String>>() {
@@ -91,8 +134,7 @@ public class CsvEditor extends Application{
         });
 
         TableColumn columnF2 = new TableColumn("f2");
-        columnF2.setCellValueFactory(
-                new PropertyValueFactory<>("f1"));
+        columnF2.setCellValueFactory(new PropertyValueFactory<>("f1"));
         columnF2.setCellFactory(cellFactory);
 
         columnF2.setOnEditCommit(new EventHandler<CellEditEvent<Record, String>>() {
@@ -103,8 +145,7 @@ public class CsvEditor extends Application{
         });
 
         TableColumn columnF3 = new TableColumn("f3");
-        columnF3.setCellValueFactory(
-                new PropertyValueFactory<>("f2"));
+        columnF3.setCellValueFactory(new PropertyValueFactory<>("f2"));
         columnF3.setCellFactory(cellFactory);
 
         columnF3.setOnEditCommit(new EventHandler<CellEditEvent<Record, String>>() {
@@ -119,16 +160,35 @@ public class CsvEditor extends Application{
         tableColumns[2] = columnF3;
 
         tableView.setItems(dataList);
-        tableView.getColumns().addAll(
-                tableColumns);
+        tableView.getColumns().addAll(tableColumns);
 
         VBox vBox = new VBox();
         vBox.setSpacing(100);
         vBox.autosize();
 
         vBox.getChildren().add(tableView);
-
+        root.getChildren().add(comboBoxUrl);
+        root.getChildren().add(comboBox);
         root.getChildren().add(vBox);
+        Button btnValider = new Button("Valider");
+        root.getChildren().add(btnValider);
+        Label label = new Label("");
+        root.getChildren().add(label);
+
+        btnValider.setOnAction(new EventHandler<ActionEvent>() {
+
+            @Override
+            public void handle(ActionEvent event) {
+                if(comboBox.getValue().getExtractor().equals("Python")){
+                    if (comboBoxUrl.getValue() != null){
+                        label.setText(new Date().toString());
+                    }
+
+                }
+                //label.setText(new Date().toString());
+            }
+        });
+
 
         stage.setScene(new Scene(root, 800, 500));
         stage.show();
@@ -136,7 +196,7 @@ public class CsvEditor extends Application{
 
     private void readCSV() throws IOException, CsvValidationException {
 
-        String csvFile = "C:\\Users\\morningstar\\Desktop\\TruthTool_PDL-Grp9-2021\\src\\Comparison_(grammar)-0.csv";
+        String csvFile = "src/Comparison_(grammar)-0.csv";
         String fieldDelimiter = ",";
         CSVReader reader = null;
         BufferedReader br;
