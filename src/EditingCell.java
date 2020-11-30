@@ -12,10 +12,11 @@ import javafx.scene.input.KeyCode;
 import javafx.scene.input.KeyEvent;
 /**
  *
- * @author Graham Smith
+
  */
 public class EditingCell extends TableCell<Record, String> {
     private TextField textField;
+
     public EditingCell() {
     }
     @Override
@@ -126,6 +127,7 @@ public class EditingCell extends TableCell<Record, String> {
             //We only want the leaves that are editable.
             if (root.isEditable()) {
                 columns.add(root);
+
             }
             return columns;
         } else {
@@ -135,4 +137,6 @@ public class EditingCell extends TableCell<Record, String> {
             return columns;
         }
     }
+
+
 }
