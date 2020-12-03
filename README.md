@@ -9,3 +9,12 @@ Realization of a field truth tool for the visualization of csv files generated b
 
 #Version
 it's just to lay the foundations
+
+
+-------------------------------------------------------------------------------------------------
+## Authors
+
+* Issa Sanogo
+* Franck Kouamelan
+* Anwar Machadi
+* Stephane Kanga
