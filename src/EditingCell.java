@@ -14,7 +14,7 @@ import javafx.scene.input.KeyEvent;
  *
 
  */
-public class EditingCell extends TableCell<Record, String> {
+public class EditingCell extends TableCell<Model, String> {
     private TextField textField;
 
     public EditingCell() {
@@ -27,18 +27,15 @@ public class EditingCell extends TableCell<Record, String> {
         }
         setGraphic(textField);
         setContentDisplay(ContentDisplay.GRAPHIC_ONLY);
-        Platform.runLater(new Runnable() {
-            @Override
-            public void run() {
-                textField.requestFocus();
-                textField.selectAll();
-            }
+        Platform.runLater(() -> {
+            textField.requestFocus();
+            textField.selectAll();
         });
     }
     @Override
     public void cancelEdit() {
         super.cancelEdit();
-        setText((String) getItem());
+        setText(getItem());
         setContentDisplay(ContentDisplay.TEXT_ONLY);
     }
     @Override
@@ -96,9 +93,9 @@ public class EditingCell extends TableCell<Record, String> {
      * @param forward true gets the column to the right, false the column to the left of the current column
      * @return
      */
-    private TableColumn<Record, ?> getNextColumn(boolean forward) {
-        List<TableColumn<Record, ?>> columns = new ArrayList<>();
-        for (TableColumn<Record, ?> column : getTableView().getColumns()) {
+    private TableColumn<Model, ?> getNextColumn(boolean forward) {
+        List<TableColumn<Model, ?>> columns = new ArrayList<>();
+        for (TableColumn<Model, ?> column : getTableView().getColumns()) {
             columns.addAll(getLeaves(column));
         }
         //There is no other column that supports editing.
@@ -121,8 +118,8 @@ public class EditingCell extends TableCell<Record, String> {
         return columns.get(nextIndex);
     }
 
-    private List<TableColumn<Record, ?>> getLeaves(TableColumn<Record, ?> root) {
-        List<TableColumn<Record, ?>> columns = new ArrayList<>();
+    private List<TableColumn<Model, ?>> getLeaves(TableColumn<Model, ?> root) {
+        List<TableColumn<Model, ?>> columns = new ArrayList<>();
         if (root.getColumns().isEmpty()) {
             //We only want the leaves that are editable.
             if (root.isEditable()) {
@@ -131,7 +128,7 @@ public class EditingCell extends TableCell<Record, String> {
             }
             return columns;
         } else {
-            for (TableColumn<Record, ?> column : root.getColumns()) {
+            for (TableColumn<Model, ?> column : root.getColumns()) {
                 columns.addAll(getLeaves(column));
             }
             return columns;
