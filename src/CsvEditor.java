@@ -242,7 +242,6 @@ public class CsvEditor extends Application {
         dataList.clear();
         CSVReader reader;
         String[] fields;
-        System.out.println("sf " + csvPath);
         reader = new CSVReader(new FileReader(csvPath));
         int numberOfColumns = 0;
         while ((fields = reader.readNext()) != null) {
@@ -295,7 +294,6 @@ public class CsvEditor extends Application {
                     //extraction des tableaux de type html au format csv
                     csvFileName = wikiMain.mkCSVFileName(url.substring(url.lastIndexOf("/") + 1, url.length()), i);
                     //System.out.println(url.substring(url.lastIndexOf("/")));
-                    System.out.println("t " + csvFileName);
                     fileMatrices.iterator().next().saveCsv(csvFileName);
                     csvFile = csvFileName;
                 }
