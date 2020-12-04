@@ -196,7 +196,6 @@ public class ConverterToCsv implements Converter {
      * @see #convertHtmlTable(Element)
      */
     public Set<FileMatrix> convertFromHtml(String url) throws IOException {
-
         LinkedHashSet<FileMatrix> csvSet = new LinkedHashSet<FileMatrix>();
 
         try {

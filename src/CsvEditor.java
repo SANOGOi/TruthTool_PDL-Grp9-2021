@@ -35,23 +35,17 @@ import static pdl1819_grp5.wikiMain.getListofUrls;
 
 public class CsvEditor extends Application {
 
-    static <S, T> Callback<TableColumn.CellDataFeatures<S, T>, ObservableValue<T>> createArrayValueFactory(Function<S, T[]> arrayExtractor, final int index) {
-        if (index < 0) {
-            return cd -> null;
-        }
-        return cd -> {
-            T[] array = arrayExtractor.apply(cd.getValue());
-            return array == null || array.length <= index ? null : new SimpleObjectProperty<>(array[index]);
-        };
-    }
+    String createFileWithChoice = "inputdata" + File.separator + "wikiurl" +
+            ".txt";
 
     private final TableView<Model> tableView = new TableView<>();
 
     private final ObservableList<Model> dataList
             = FXCollections.observableArrayList();
-//    String csvFile = "src/Comparison_(grammar)-0.csv";
+    //    String csvFile = "src/Comparison_(grammar)-0.csv";
     String csvFile = "";
     int numberOfColumns = 0;
+
     @Override
     public void start(Stage stage) throws IOException, CsvValidationException {
 
@@ -166,31 +160,65 @@ public class CsvEditor extends Application {
                 if (comboBox.getValue().getExtractor().equals("JHtml")) {
                     if (comboBoxUrl.getValue().toString() != "") {
                         try {
-                            System.out.println("g " +
-                                    ""+comboBoxUrl.getValue());
                             extractHtml(comboBoxUrl.getValue().toString(), 1);
-                            System.out.println(csvFile);
-                            numberOfColumns = readCSV(csvFile);
-                            if (!dataList.isEmpty()) {
-                                TableColumn[] tableColumns = new TableColumn[numberOfColumns];
-                                for (int i = 0; i < numberOfColumns; i++) {
-                                    // Create a column. For the time being, the property number is the display name.
-                                    TableColumn<Model, String> column = new TableColumn<>("" + i);
-                                    int finalI = i;
-                                    column.setCellValueFactory(features -> features.getValue().propertyAt(finalI));
-                                    column.setCellFactory(cellFactory);
-                                    column.setOnEditCommit(new EventHandler<CellEditEvent<Model, String>>() {
-                                        @Override
-                                        public void handle(CellEditEvent<Model, String> t) {
-                                            t.getTableView().getItems().get(t.getTablePosition().getRow()).setAt(finalI, t.getNewValue());
-                                        }
-                                    });
-                                    tableColumns[finalI] = column;
+                            if (!csvFile.isEmpty()) {
+                                numberOfColumns = readCSV(csvFile);
+                                if (!dataList.isEmpty()) {
+                                    TableColumn[] tableColumns = new TableColumn[numberOfColumns];
+                                    for (int i = 0; i < numberOfColumns; i++) {
+                                        // Create a column. For the time being, the property number is the display name.
+                                        TableColumn<Model, String> column = new TableColumn<>("" + i);
+                                        int finalI = i;
+                                        column.setCellValueFactory(features -> features.getValue().propertyAt(finalI));
+                                        column.setCellFactory(cellFactory);
+                                        column.setOnEditCommit(new EventHandler<CellEditEvent<Model, String>>() {
+                                            @Override
+                                            public void handle(CellEditEvent<Model, String> t) {
+                                                t.getTableView().getItems().get(t.getTablePosition().getRow()).setAt(finalI, t.getNewValue());
+                                            }
+                                        });
+                                        tableColumns[finalI] = column;
+                                    }
+                                    tableView.setItems(dataList);
+                                    tableView.getColumns().addAll(tableColumns);
                                 }
-                                tableView.setItems(dataList);
-                                tableView.getColumns().addAll(tableColumns);
                             }
+                            tableView.refresh();
+                        } catch (IOException | CsvValidationException e) {
+                            e.printStackTrace();
+                        }
+                        label.setText(new Date().toString());
+                    }
 
+                }
+
+                if (comboBox.getValue().getExtractor().equals("JWikiText")) {
+                    if (comboBoxUrl.getValue().toString() != "") {
+                        try {
+                            extractWikitext(comboBoxUrl.getValue().toString(), 1);
+                            if (!csvFile.isEmpty()) {
+                                numberOfColumns = readCSV(csvFile);
+                                if (!dataList.isEmpty()) {
+                                    System.out.println("y");
+                                    TableColumn[] tableColumns = new TableColumn[numberOfColumns];
+                                    for (int i = 0; i < numberOfColumns; i++) {
+                                        // Create a column. For the time being, the property number is the display name.
+                                        TableColumn<Model, String> column = new TableColumn<>("" + i);
+                                        int finalI = i;
+                                        column.setCellValueFactory(features -> features.getValue().propertyAt(finalI));
+                                        column.setCellFactory(cellFactory);
+                                        column.setOnEditCommit(new EventHandler<CellEditEvent<Model, String>>() {
+                                            @Override
+                                            public void handle(CellEditEvent<Model, String> t) {
+                                                t.getTableView().getItems().get(t.getTablePosition().getRow()).setAt(finalI, t.getNewValue());
+                                            }
+                                        });
+                                        tableColumns[finalI] = column;
+                                    }
+                                    tableView.setItems(dataList);
+                                    tableView.getColumns().addAll(tableColumns);
+                                }
+                            }
                             tableView.refresh();
 
                         } catch (IOException | CsvValidationException e) {
@@ -214,7 +242,7 @@ public class CsvEditor extends Application {
         dataList.clear();
         CSVReader reader;
         String[] fields;
-        System.out.println(csvPath);
+        System.out.println("sf " + csvPath);
         reader = new CSVReader(new FileReader(csvPath));
         int numberOfColumns = 0;
         while ((fields = reader.readNext()) != null) {
@@ -238,11 +266,12 @@ public class CsvEditor extends Application {
         writer.close();
     }
 
-    public void extractHtml(String url, int tableNumber) throws IOException {
-        String createFileWithChoice = "inputdata" + File.separator + "wikiurl.txt";
+    public void extractHtml(String curl, int tableNumber) throws IOException {
+
         BufferedWriter writer;
         writer = new BufferedWriter(new FileWriter(createFileWithChoice));
-        writer.write(url);
+        writer.write(curl);
+        writer.close();
 
         File urlsFile = new File(createFileWithChoice);
         WikipediaMatrix wiki = new WikipediaMatrix();
@@ -255,20 +284,60 @@ public class CsvEditor extends Application {
         urlMatrixSet = wiki.getConvertResult();
 
         //save files
-        ArrayList<String> urls = new ArrayList<String>();
         String csvFileName = "";
-
+        String url;
+        System.out.println("i " + wiki.getUrlsMatrix());
         for (UrlMatrix urlMatrix : urlMatrixSet) {
+            url = urlMatrix.getLink();
             Set<FileMatrix> fileMatrices = urlMatrix.getFileMatrix();
-            for (int i = tableNumber - 1; i < tableNumber; i++) {
-                //extraction des tableaux de type html au format csv
-                csvFileName = wikiMain.mkCSVFileName(url.substring(url.lastIndexOf("/") + 1, url.length()), i);
-                //System.out.println(url.substring(url.lastIndexOf("/")));
-                fileMatrices.iterator().next().saveCsv(csvFileName);
-                csvFile = csvFileName;
+            if (fileMatrices.size() > 0) {
+                for (int i = tableNumber - 1; i < tableNumber; i++) {
+                    //extraction des tableaux de type html au format csv
+                    csvFileName = wikiMain.mkCSVFileName(url.substring(url.lastIndexOf("/") + 1, url.length()), i);
+                    //System.out.println(url.substring(url.lastIndexOf("/")));
+                    System.out.println("t " + csvFileName);
+                    fileMatrices.iterator().next().saveCsv(csvFileName);
+                    csvFile = csvFileName;
+                }
             }
         }
-        System.out.println(csvFileName);
+    }
+
+    public void extractWikitext(String curl, int tableNumber) throws IOException {
+
+        BufferedWriter writer;
+        writer = new BufferedWriter(new FileWriter(createFileWithChoice));
+        writer.write(curl);
+        writer.close();
+
+        File urlsFile = new File(createFileWithChoice);
+        WikipediaMatrix wiki = new WikipediaMatrix();
+        Set<UrlMatrix> urlMatrixSet;
+        // Html extraction
+        wiki.setUrlsMatrix(getListofUrls(urlsFile));
+        wiki.setExtractType(ExtractType.WIKITEXT);
+        //System.out.println("Extracting via html...");
+
+        urlMatrixSet = wiki.getConvertResult();
+
+        //save files
+        String csvFileName = "";
+        String url;
+        System.out.println("i " + wiki.getUrlsMatrix());
+
+        for (UrlMatrix urlMatrix : urlMatrixSet) {
+            url = urlMatrix.getLink();
+            Set<FileMatrix> fileMatrices = urlMatrix.getFileMatrix();
+            if (fileMatrices.size() > 0) {
+                for (int i = tableNumber - 1; i < tableNumber; i++) {
+                    //extraction des tableaux de type html au format csv
+                    csvFileName = wikiMain.mkCSVFileName(url.substring(url.lastIndexOf("/") + 1, url.length()), i);
+                    //System.out.println(url.substring(url.lastIndexOf("/")));
+                    fileMatrices.iterator().next().saveCsv(csvFileName);
+                    csvFile = csvFileName;
+                }
+            }
+        }
     }
 
 
