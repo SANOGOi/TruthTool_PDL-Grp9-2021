@@ -21,13 +21,17 @@ import javafx.util.Callback;
 import org.o7planning.javafx.model.ComboExtractor;
 import org.o7planning.javafx.model.ComboUrl;
 import org.o7planning.javafx.model.ExtractorList;
+import pdl1819_grp5.*;
 
-import java.io.FileReader;
-import java.io.FileWriter;
-import java.io.IOException;
+import java.io.*;
+import java.util.ArrayList;
 import java.util.Date;
 import java.util.List;
+import java.util.Set;
 import java.util.function.Function;
+import java.util.logging.Level;
+
+import static pdl1819_grp5.wikiMain.getListofUrls;
 
 public class CsvEditor extends Application {
 
@@ -45,8 +49,9 @@ public class CsvEditor extends Application {
 
     private final ObservableList<Model> dataList
             = FXCollections.observableArrayList();
-    String csvFile = "src/Comparison_(grammar)-0.csv";
-
+//    String csvFile = "src/Comparison_(grammar)-0.csv";
+    String csvFile = "";
+    int numberOfColumns = 0;
     @Override
     public void start(Stage stage) throws IOException, CsvValidationException {
 
@@ -104,7 +109,6 @@ public class CsvEditor extends Application {
         //Scene scene = new Scene(root1, 350, 300);
         //stage.setScene(scene);
         //
-        int numberOfColumns = readCSV(csvFile);
         stage.setTitle("CSV Editor");
 
         Callback<TableColumn<Model, String>, TableCell<Model, String>> cellFactory = new Callback<TableColumn<Model, String>, TableCell<Model, String>>() {
@@ -115,23 +119,6 @@ public class CsvEditor extends Application {
         };
 
         tableView.setEditable(true);
-        TableColumn[] tableColumns = new TableColumn[numberOfColumns];
-        for (int i = 0; i < numberOfColumns; i++) {
-            // Create a column. For the time being, the property number is the display name.
-            TableColumn<Model, String> column = new TableColumn<>("" + i);
-            int finalI = i;
-            column.setCellValueFactory(features -> features.getValue().propertyAt(finalI));
-            column.setCellFactory(cellFactory);
-            column.setOnEditCommit(new EventHandler<CellEditEvent<Model, String>>() {
-                @Override
-                public void handle(CellEditEvent<Model, String> t) {
-                    t.getTableView().getItems().get(t.getTablePosition().getRow()).setAt(finalI, t.getNewValue());
-                }
-            });
-            tableColumns[finalI] = column;
-        }
-        tableView.getItems().setAll(dataList);
-        tableView.getColumns().addAll(tableColumns);
 
         VBox vBox = new VBox();
         vBox.setSpacing(100);
@@ -144,7 +131,6 @@ public class CsvEditor extends Application {
         root.getChildren().add(comboBox);
 
 
-
         Button btnValider = new Button("Valider");
         root.getChildren().add(btnValider);
         root.getChildren().add(vBox);
@@ -155,8 +141,8 @@ public class CsvEditor extends Application {
 
         // action on buttons
         btnSave.setOnAction(event -> {
-            for (int i = 0; i<tableView.getItems().size(); i++){
-                for (int j = 0; j< tableView.getColumns().size(); j++){
+            for (int i = 0; i < tableView.getItems().size(); i++) {
+                for (int j = 0; j < tableView.getColumns().size(); j++) {
                     String newValue = tableView.getItems().get(i).getAt(j);
                     try {
                         updateCSV(csvFile, csvFile, newValue, i, j);
@@ -168,18 +154,48 @@ public class CsvEditor extends Application {
         });
 
         btnValider.setOnAction(new EventHandler<ActionEvent>() {
-
             @Override
             public void handle(ActionEvent event) {
+                tableView.getColumns().clear();
                 if (comboBox.getValue().getExtractor().equals("Python")) {
                     if (comboBoxUrl.getValue() != null) {
                         label.setText(new Date().toString());
                     }
 
                 }
-                if (comboBox.getValue().getExtractor().equals("JWikiText")) {
-                    if (comboBoxUrl.getValue() != null) {
-                        System.out.println(comboBoxUrl.getValue());
+                if (comboBox.getValue().getExtractor().equals("JHtml")) {
+                    if (comboBoxUrl.getValue().toString() != "") {
+                        try {
+                            System.out.println("g " +
+                                    ""+comboBoxUrl.getValue());
+                            extractHtml(comboBoxUrl.getValue().toString(), 1);
+                            System.out.println(csvFile);
+                            numberOfColumns = readCSV(csvFile);
+                            if (!dataList.isEmpty()) {
+                                TableColumn[] tableColumns = new TableColumn[numberOfColumns];
+                                for (int i = 0; i < numberOfColumns; i++) {
+                                    // Create a column. For the time being, the property number is the display name.
+                                    TableColumn<Model, String> column = new TableColumn<>("" + i);
+                                    int finalI = i;
+                                    column.setCellValueFactory(features -> features.getValue().propertyAt(finalI));
+                                    column.setCellFactory(cellFactory);
+                                    column.setOnEditCommit(new EventHandler<CellEditEvent<Model, String>>() {
+                                        @Override
+                                        public void handle(CellEditEvent<Model, String> t) {
+                                            t.getTableView().getItems().get(t.getTablePosition().getRow()).setAt(finalI, t.getNewValue());
+                                        }
+                                    });
+                                    tableColumns[finalI] = column;
+                                }
+                                tableView.setItems(dataList);
+                                tableView.getColumns().addAll(tableColumns);
+                            }
+
+                            tableView.refresh();
+
+                        } catch (IOException | CsvValidationException e) {
+                            e.printStackTrace();
+                        }
                         label.setText(new Date().toString());
                     }
 
@@ -195,22 +211,25 @@ public class CsvEditor extends Application {
     }
 
     private int readCSV(String csvPath) throws IOException, CsvValidationException {
+        dataList.clear();
         CSVReader reader;
         String[] fields;
+        System.out.println(csvPath);
         reader = new CSVReader(new FileReader(csvPath));
-        int numberOfColumns = reader.readNext().length;
+        int numberOfColumns = 0;
         while ((fields = reader.readNext()) != null) {
             Model model = new Model(fields);
             dataList.add(model);
+            numberOfColumns = fields.length;
         }
         return numberOfColumns;
     }
 
-    public static void updateCSV(String input, String output, String  replace, int row, int col) throws IOException, CsvException {
+    public static void updateCSV(String input, String output, String replace, int row, int col) throws IOException, CsvException {
 
         CSVReader reader = new CSVReader(new FileReader(input));
         List<String[]> csvBody = reader.readAll();
-        csvBody.get(row)[col]=replace;
+        csvBody.get(row)[col] = replace;
         reader.close();
 
         CSVWriter writer = new CSVWriter(new FileWriter(output));
@@ -218,6 +237,40 @@ public class CsvEditor extends Application {
         writer.flush();
         writer.close();
     }
+
+    public void extractHtml(String url, int tableNumber) throws IOException {
+        String createFileWithChoice = "inputdata" + File.separator + "wikiurl.txt";
+        BufferedWriter writer;
+        writer = new BufferedWriter(new FileWriter(createFileWithChoice));
+        writer.write(url);
+
+        File urlsFile = new File(createFileWithChoice);
+        WikipediaMatrix wiki = new WikipediaMatrix();
+        Set<UrlMatrix> urlMatrixSet;
+        // Html extraction
+        wiki.setUrlsMatrix(getListofUrls(urlsFile));
+        wiki.setExtractType(ExtractType.HTML);
+        //System.out.println("Extracting via html...");
+
+        urlMatrixSet = wiki.getConvertResult();
+
+        //save files
+        ArrayList<String> urls = new ArrayList<String>();
+        String csvFileName = "";
+
+        for (UrlMatrix urlMatrix : urlMatrixSet) {
+            Set<FileMatrix> fileMatrices = urlMatrix.getFileMatrix();
+            for (int i = tableNumber - 1; i < tableNumber; i++) {
+                //extraction des tableaux de type html au format csv
+                csvFileName = wikiMain.mkCSVFileName(url.substring(url.lastIndexOf("/") + 1, url.length()), i);
+                //System.out.println(url.substring(url.lastIndexOf("/")));
+                fileMatrices.iterator().next().saveCsv(csvFileName);
+                csvFile = csvFileName;
+            }
+        }
+        System.out.println(csvFileName);
+    }
+
 
     public static void main(String[] args) {
 
