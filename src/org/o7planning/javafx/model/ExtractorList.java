@@ -46,8 +46,8 @@ public class ExtractorList {
         return list;
     }
 
-    public static ObservableList<Integer> getNbrCsv() throws IOException {
-        File dir = new File("/Users/bijou/PycharmProjects/PDL_2021_groupe_9/output");
+    public static ObservableList<Integer> getNbrCsv(String path) throws IOException {
+        File dir = new File(path);
         File[] liste = dir.listFiles();
         int nbrCsv = 0;
         List<Integer> listNbrCSV = new ArrayList<Integer>();
@@ -58,7 +58,7 @@ public class ExtractorList {
             }
         }
         ObservableList<Integer> listInt = FXCollections.observableArrayList(listNbrCSV);
-
+        System.out.println(path);
         return listInt;
     }
 

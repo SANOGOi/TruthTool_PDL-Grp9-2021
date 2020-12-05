@@ -62,7 +62,7 @@ public class CsvEditor extends Application {
         comboBox.getSelectionModel().select(1);
 
         ComboBox<Integer> comboNbrCsv = new ComboBox<>();
-        setComboNbrCsv(comboNbrCsv);
+        setComboNbrCsv(comboNbrCsv, directory.getAbsolutePath());
 
         FlowPane root = new FlowPane();
         //FlowPane root1 = new FlowPane();
@@ -163,7 +163,7 @@ public class CsvEditor extends Application {
                         try {
                             writeData(urlCombo, pathInput);
                             appelPythonExtract();
-                            setComboNbrCsv(comboNbrCsv);
+                            setComboNbrCsv(comboNbrCsv, pathOutput);
                         } catch (IOException e) {
                             e.printStackTrace();
                         }
@@ -174,30 +174,9 @@ public class CsvEditor extends Application {
                     if (comboBoxUrl.getValue().toString() != "") {
                         try {
                             extractHtml(comboBoxUrl.getValue().toString());
-                            if (!csvFile.isEmpty()) {
-                                numberOfColumns = readCSV(csvFile);
-                                if (!dataList.isEmpty()) {
-                                    TableColumn[] tableColumns = new TableColumn[numberOfColumns];
-                                    for (int i = 0; i < numberOfColumns; i++) {
-                                        // Create a column. For the time being, the property number is the display name.
-                                        TableColumn<Model, String> column = new TableColumn<>("" + i);
-                                        int finalI = i;
-                                        column.setCellValueFactory(features -> features.getValue().propertyAt(finalI));
-                                        column.setCellFactory(cellFactory);
-                                        column.setOnEditCommit(new EventHandler<CellEditEvent<Model, String>>() {
-                                            @Override
-                                            public void handle(CellEditEvent<Model, String> t) {
-                                                t.getTableView().getItems().get(t.getTablePosition().getRow()).setAt(finalI, t.getNewValue());
-                                            }
-                                        });
-                                        tableColumns[finalI] = column;
-                                    }
-                                    tableView.setItems(dataList);
-                                    tableView.getColumns().addAll(tableColumns);
-                                }
-                            }
-                            tableView.refresh();
-                        } catch (IOException | CsvValidationException e) {
+                            setComboNbrCsv(comboNbrCsv, directory.getAbsolutePath() + File.separator + "html");
+
+                        } catch (IOException e) {
                             e.printStackTrace();
                         }
                     }
@@ -208,34 +187,11 @@ public class CsvEditor extends Application {
                     if (comboBoxUrl.getValue().toString() != "") {
                         try {
                             extractWikitext(comboBoxUrl.getValue().toString());
-                            if (!csvFile.isEmpty()) {
-                                numberOfColumns = readCSV(csvFile);
-                                if (!dataList.isEmpty()) {
-                                    TableColumn[] tableColumns = new TableColumn[numberOfColumns];
-                                    for (int i = 0; i < numberOfColumns; i++) {
-                                        // Create a column. For the time being, the property number is the display name.
-                                        TableColumn<Model, String> column = new TableColumn<>("" + i);
-                                        int finalI = i;
-                                        column.setCellValueFactory(features -> features.getValue().propertyAt(finalI));
-                                        column.setCellFactory(cellFactory);
-                                        column.setOnEditCommit(new EventHandler<CellEditEvent<Model, String>>() {
-                                            @Override
-                                            public void handle(CellEditEvent<Model, String> t) {
-                                                t.getTableView().getItems().get(t.getTablePosition().getRow()).setAt(finalI, t.getNewValue());
-                                            }
-                                        });
-                                        tableColumns[finalI] = column;
-                                    }
-                                    tableView.setItems(dataList);
-                                    tableView.getColumns().addAll(tableColumns);
-                                }
-                            }
-                            tableView.refresh();
+                            setComboNbrCsv(comboNbrCsv, directory.getAbsolutePath() + File.separator + "wikitext");
 
-                        } catch (IOException | CsvValidationException e) {
+                        } catch (IOException e) {
                             e.printStackTrace();
                         }
-                        label.setText(new Date().toString());
                     }
 
                 }
@@ -246,10 +202,20 @@ public class CsvEditor extends Application {
 
         EventHandler<ActionEvent> event = new EventHandler<ActionEvent>() {
             public void handle(ActionEvent e) {
+                String csvFileName = comboBoxUrl.getValue()+ "-" + (comboNbrCsv.getValue() - 1) + ".csv";
                 if (comboNbrCsv.getValue() != null) {
                     tableView.getColumns().clear();
                     try {
-                        numberOfColumns = readCSVPython(comboNbrCsv.getValue());
+                        if (comboBox.getValue().getExtractor().equals("Python")) {
+                            numberOfColumns = readCSVPython(comboNbrCsv.getValue());
+                        }
+                        else if(comboBox.getValue().getExtractor().equals("JHtml")){
+                            numberOfColumns = readCSV(directory.getAbsoluteFile() + File.separator + "html" + File.separator + csvFileName);
+                        }
+                        else if(comboBox.getValue().getExtractor().equals("JWikiText")){
+                            System.out.println("f");
+                            numberOfColumns = readCSV(directory.getAbsoluteFile() + File.separator + "wikitext" + File.separator + csvFileName);
+                        }
                         if (!dataList.isEmpty()) {
                             TableColumn[] tableColumns = new TableColumn[numberOfColumns];
                             for (int i = 0; i < numberOfColumns; i++) {
@@ -286,8 +252,8 @@ public class CsvEditor extends Application {
         stage.show();
     }
 
-    private void setComboNbrCsv (ComboBox<Integer> comboNbrCsv) throws IOException {
-        ObservableList<Integer> listIntNbrCsv = ExtractorList.getNbrCsv();
+    private void setComboNbrCsv (ComboBox<Integer> comboNbrCsv, String path) throws IOException {
+        ObservableList<Integer> listIntNbrCsv = ExtractorList.getNbrCsv(path);
         comboNbrCsv.setItems(listIntNbrCsv);
         comboNbrCsv.getSelectionModel().select(1);
     }
@@ -327,7 +293,6 @@ public class CsvEditor extends Application {
 
     private int readCSVPython (int tabNumber) throws IOException, CsvValidationException {
         return readCSV(ExtractorList.getFileSelected(tabNumber).getPath());
-
     }
 
     private int readCSV(String csvPath) throws IOException, CsvValidationException {
