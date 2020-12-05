@@ -15,7 +15,7 @@ Realization of a field truth tool for the visualization of csv files generated b
  
  #before lunch application
  * update Python extractors existing in project by a pull resquest in your Python extractor's project or click on this [link](https://github.com/morningxtar/PDL_2021_groupe_9) to clone it (download) from git repository and import locally. 
- * In your project, add in  ExtractorList(on lines 50 and 66) and CvsEditor classes(on lines 159 and 160), the path of your output folder present in your local Python extractor's project like this example: <<"/YOUR_PATH/PycharmProjects/PDL_2021_groupe_9/output">>
+ * In your project, add in  ExtractorList(on line 66) and CvsEditor classes(on lines 164 and 165), the path of your output folder present in your local Python extractor's project like this example: <<"/YOUR_PATH/PycharmProjects/PDL_2021_groupe_9/output">>
 
 -------------------------------------------------------------------------------------------------
 ## Authors

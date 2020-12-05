@@ -161,8 +161,8 @@ public class CsvEditor extends Application {
                 if (comboBox.getValue().getExtractor().equals("Python")) {
                     if (comboBoxUrl.getValue() != null) {
                         String urlCombo = comboBoxUrl.getValue().getExtractor();
-                        String pathInput = "/Users/bijou/PycharmProjects/PDL_2021_groupe_9/input/wikiurls.txt";
-                        String pathOutput = "/Users/bijou/PycharmProjects/PDL_2021_groupe_9/output";
+                        String pathInput = "/home/isanogo/PycharmProjects/PDL_2021_groupe_9/input/wikiurls.txt";
+                        String pathOutput = "/home/isanogo/PycharmProjects/PDL_2021_groupe_9/output";
                         File outPut = new File(pathOutput);
                         emptyDirectory(outPut);
                         try {

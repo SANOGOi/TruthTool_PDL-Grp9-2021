@@ -63,7 +63,7 @@ public class ExtractorList {
     }
 
     public static File getFileSelected(int numFile) throws IOException {
-        File dir = new File("/Users/bijou/PycharmProjects/PDL_2021_groupe_9/output");
+        File dir = new File("/home/isanogo/PycharmProjects/PDL_2021_groupe_9/output");
         File[] liste = dir.listFiles();
         int nbrCsv = 0;
         for (File item : liste) {
