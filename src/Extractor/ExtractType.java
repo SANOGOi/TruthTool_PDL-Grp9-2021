@@ -1,4 +1,4 @@
-package pdl1819_grp5;
+package Extractor;
 
 /**
  * obligate HTML and WIKITEXT as only values possible for data extraction

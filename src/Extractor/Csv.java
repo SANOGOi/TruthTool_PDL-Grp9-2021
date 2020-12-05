@@ -1,9 +1,5 @@
-package pdl1819_grp5;
+package Extractor;
 
-
-import java.io.File;
-import java.io.FileWriter;
-import java.io.IOException;
 
 public class Csv extends FileMatrix
 {

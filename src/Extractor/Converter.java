@@ -1,4 +1,4 @@
-package pdl1819_grp5;
+package Extractor;
 
 
 import java.io.IOException;

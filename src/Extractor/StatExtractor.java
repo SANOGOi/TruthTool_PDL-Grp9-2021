@@ -1,4 +1,4 @@
-package pdl1819_grp5;
+package Extractor;
 
 import org.jsoup.Jsoup;
 import org.jsoup.nodes.Document;
@@ -9,9 +9,8 @@ import java.io.FileWriter;
 import java.io.IOException;
 import java.util.ArrayList;
 import java.util.Set;
-import java.util.logging.Level;
 
-import static pdl1819_grp5.wikiMain.getListofUrls;
+import static Extractor.wikiMain.getListofUrls;
 
 
 public class StatExtractor {
