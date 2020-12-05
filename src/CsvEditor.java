@@ -50,18 +50,17 @@ public class CsvEditor extends Application {
     public void start(Stage stage) throws IOException, CsvValidationException {
 
         ComboBox<ComboUrl> comboBoxUrl = new ComboBox<ComboUrl>();
-
         ObservableList<ComboUrl> list1 = ExtractorList.getUrlList();
-
         comboBoxUrl.setItems(list1);
         comboBoxUrl.getSelectionModel().select(1);
 
         ComboBox<ComboExtractor> comboBox = new ComboBox<ComboExtractor>();
-
         ObservableList<ComboExtractor> list = ExtractorList.getExtractorList();
-
         comboBox.setItems(list);
         comboBox.getSelectionModel().select(1);
+
+        ComboBox<Integer> comboNbrCsv = new ComboBox<>();
+        setComboNbrCsv(comboNbrCsv);
 
         FlowPane root = new FlowPane();
         //FlowPane root1 = new FlowPane();
@@ -123,6 +122,7 @@ public class CsvEditor extends Application {
 
         root.getChildren().add(comboBoxUrl);
         root.getChildren().add(comboBox);
+        root.getChildren().add(comboNbrCsv);
 
 
         Button btnValider = new Button("Valider");
@@ -153,7 +153,18 @@ public class CsvEditor extends Application {
                 tableView.getColumns().clear();
                 if (comboBox.getValue().getExtractor().equals("Python")) {
                     if (comboBoxUrl.getValue() != null) {
-                        label.setText(new Date().toString());
+                        String urlCombo = comboBoxUrl.getValue().getExtractor();
+                        String pathInput = "/home/isanogo/PycharmProjects/PDL_2021_groupe_9/input/wikiurls.txt";
+                        String pathOutput = "/home/isanogo/PycharmProjects/PDL_2021_groupe_9/output";
+                        File outPut = new File(pathOutput);
+                        emptyDirectory(outPut);
+                        try {
+                            writeData(urlCombo, pathInput);
+                            appelPythonExtract();
+                            setComboNbrCsv(comboNbrCsv);
+                        } catch (IOException e) {
+                            e.printStackTrace();
+                        }
                     }
 
                 }
@@ -187,7 +198,6 @@ public class CsvEditor extends Application {
                         } catch (IOException | CsvValidationException e) {
                             e.printStackTrace();
                         }
-                        label.setText(new Date().toString());
                     }
 
                 }
@@ -224,7 +234,6 @@ public class CsvEditor extends Application {
                         } catch (IOException | CsvValidationException e) {
                             e.printStackTrace();
                         }
-                        label.setText(new Date().toString());
                     }
 
                 }
@@ -233,9 +242,90 @@ public class CsvEditor extends Application {
             }
         });
 
+        EventHandler<ActionEvent> event = new EventHandler<ActionEvent>() {
+            public void handle(ActionEvent e) {
+                if (comboNbrCsv.getValue() != null) {
+                    tableView.getColumns().clear();
+                    try {
+                        numberOfColumns = readCSVPython(comboNbrCsv.getValue());
+                        if (!dataList.isEmpty()) {
+                            TableColumn[] tableColumns = new TableColumn[numberOfColumns];
+                            for (int i = 0; i < numberOfColumns; i++) {
+                                // Create a column. For the time being, the property number is the display name.
+                                TableColumn<Model, String> column = new TableColumn<>("" + i);
+                                int finalI = i;
+                                column.setCellValueFactory(features -> features.getValue().propertyAt(finalI));
+                                column.setCellFactory(cellFactory);
+                                column.setOnEditCommit(new EventHandler<CellEditEvent<Model, String>>() {
+                                    @Override
+                                    public void handle(CellEditEvent<Model, String> t) {
+                                        t.getTableView().getItems().get(t.getTablePosition().getRow()).setAt(finalI, t.getNewValue());
+                                    }
+                                });
+                                tableColumns[finalI] = column;
+                            }
+                            tableView.setItems(dataList);
+                            tableView.getColumns().addAll(tableColumns);
+                        }
+                        tableView.refresh();
+                    } catch (IOException | CsvValidationException ioException) {
+                        ioException.printStackTrace();
+                    }
+
+                }
+
+            }
+        };
+
+        comboNbrCsv.setOnAction(event);
+
 
         stage.setScene(new Scene(root, 800, 500));
         stage.show();
+    }
+
+    private void setComboNbrCsv (ComboBox<Integer> comboNbrCsv) throws IOException {
+        ObservableList<Integer> listIntNbrCsv = ExtractorList.getNbrCsv();
+        comboNbrCsv.setItems(listIntNbrCsv);
+        comboNbrCsv.getSelectionModel().select(1);
+    }
+
+    private void writeData(String url, String path) throws IOException {
+        BufferedWriter writer = new BufferedWriter(new FileWriter(path));
+        writer.write(url);
+
+        writer.close();
+    }
+
+    private void emptyDirectory(File folder){
+        for(File file : folder.listFiles()){
+            if(file.isDirectory()){
+                emptyDirectory(file);
+            }
+            file.delete();
+        } }
+
+    private void appelPythonExtract() throws IOException {
+
+        String PYTHON_OUTPUT  = "src/codePython.py";
+        Process p = Runtime.getRuntime().exec("python3 " + PYTHON_OUTPUT);
+        // output
+        BufferedReader stdInput = new BufferedReader(new InputStreamReader(p.getInputStream()));
+        // error
+        BufferedReader stdError = new BufferedReader(new InputStreamReader(p.getErrorStream()));
+        String o;
+        while ((o = stdInput.readLine()) != null) {
+            System.out.println(o);
+        }
+        String err;
+        while ((err = stdError.readLine()) != null) {
+            System.out.println(err);
+        }
+    }
+
+    private int readCSVPython (int tabNumber) throws IOException, CsvValidationException {
+        return readCSV(ExtractorList.getFileSelected(tabNumber).getPath());
+
     }
 
     private int readCSV(String csvPath) throws IOException, CsvValidationException {
@@ -301,7 +391,7 @@ public class CsvEditor extends Application {
         }
     }
 
-    public void extractWikitext(String curl, int tableNumber) throws IOException {
+    public void  extractWikitext(String curl, int tableNumber) throws IOException {
 
         BufferedWriter writer;
         writer = new BufferedWriter(new FileWriter(createFileWithChoice));
