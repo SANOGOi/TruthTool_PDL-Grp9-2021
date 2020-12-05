@@ -276,14 +276,12 @@ public class CsvEditor extends Application {
         File urlsFile = new File(createFileWithChoice);
         WikipediaMatrix wiki = new WikipediaMatrix();
         Set<UrlMatrix> urlMatrixSet;
-        // Html extraction
+
         wiki.setUrlsMatrix(getListofUrls(urlsFile));
         wiki.setExtractType(ExtractType.HTML);
-        //System.out.println("Extracting via html...");
 
         urlMatrixSet = wiki.getConvertResult();
 
-        //save files
         String csvFileName = "";
         String url;
         for (UrlMatrix urlMatrix : urlMatrixSet) {
@@ -297,7 +295,6 @@ public class CsvEditor extends Application {
                 for (FileMatrix f : fileMatrices) {
                     csvFileName = mkCSVFileName(url.substring(url.lastIndexOf("/") + 1, url.length()), i);
                     f.saveCsv(htmlDir.getAbsolutePath() + File.separator + csvFileName);
-                    csvFile = csvFileName;
                     i++;
                 }
             }
@@ -313,14 +310,12 @@ public class CsvEditor extends Application {
         File urlsFile = new File(createFileWithChoice);
         WikipediaMatrix wiki = new WikipediaMatrix();
         Set<UrlMatrix> urlMatrixSet;
-        // Html extraction
+
         wiki.setUrlsMatrix(getListofUrls(urlsFile));
         wiki.setExtractType(ExtractType.WIKITEXT);
-        //System.out.println("Extracting via html...");
 
         urlMatrixSet = wiki.getConvertResult();
 
-        //save files
         String csvFileName = "";
         String url;
 
@@ -328,7 +323,6 @@ public class CsvEditor extends Application {
             int i = 0;
             url = urlMatrix.getLink();
             Set<FileMatrix> fileMatrices = urlMatrix.getFileMatrix();
-
             File wikitextDir = new File(directory.getAbsoluteFile() + "" + File.separator + "wikitext");
             wikitextDir.mkdirs();
             deleteAllFiles(wikitextDir);
