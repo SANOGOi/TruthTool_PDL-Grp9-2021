@@ -153,6 +153,11 @@ public class CsvEditor extends Application {
             @Override
             public void handle(ActionEvent event) {
                 tableView.getColumns().clear();
+                try {
+                    setComboNbrCsv(comboNbrCsv, directory.getAbsolutePath());
+                } catch (IOException e) {
+                    e.printStackTrace();
+                }
                 if (comboBox.getValue().getExtractor().equals("Python")) {
                     if (comboBoxUrl.getValue() != null) {
                         String urlCombo = comboBoxUrl.getValue().getExtractor();
@@ -202,8 +207,8 @@ public class CsvEditor extends Application {
 
         EventHandler<ActionEvent> event = new EventHandler<ActionEvent>() {
             public void handle(ActionEvent e) {
-                String csvFileName = comboBoxUrl.getValue()+ "-" + (comboNbrCsv.getValue() - 1) + ".csv";
                 if (comboNbrCsv.getValue() != null) {
+                    String csvFileName = comboBoxUrl.getValue()+ "-" + (comboNbrCsv.getValue() - 1) + ".csv";
                     tableView.getColumns().clear();
                     try {
                         if (comboBox.getValue().getExtractor().equals("Python")) {
@@ -213,7 +218,6 @@ public class CsvEditor extends Application {
                             numberOfColumns = readCSV(directory.getAbsoluteFile() + File.separator + "html" + File.separator + csvFileName);
                         }
                         else if(comboBox.getValue().getExtractor().equals("JWikiText")){
-                            System.out.println("f");
                             numberOfColumns = readCSV(directory.getAbsoluteFile() + File.separator + "wikitext" + File.separator + csvFileName);
                         }
                         if (!dataList.isEmpty()) {
@@ -254,8 +258,8 @@ public class CsvEditor extends Application {
 
     private void setComboNbrCsv (ComboBox<Integer> comboNbrCsv, String path) throws IOException {
         ObservableList<Integer> listIntNbrCsv = ExtractorList.getNbrCsv(path);
-        comboNbrCsv.setItems(listIntNbrCsv);
-        comboNbrCsv.getSelectionModel().select(1);
+            comboNbrCsv.setItems(listIntNbrCsv);
+            comboNbrCsv.getSelectionModel().select(1);
     }
 
     private void writeData(String url, String path) throws IOException {
