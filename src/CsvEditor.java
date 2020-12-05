@@ -1,9 +1,12 @@
+import Extractor.ExtractType;
+import Extractor.FileMatrix;
+import Extractor.UrlMatrix;
+import Extractor.WikipediaMatrix;
 import com.opencsv.CSVReader;
 import com.opencsv.CSVWriter;
 import com.opencsv.exceptions.CsvException;
 import com.opencsv.exceptions.CsvValidationException;
 import javafx.application.Application;
-import javafx.beans.property.SimpleObjectProperty;
 import javafx.beans.value.ChangeListener;
 import javafx.beans.value.ObservableValue;
 import javafx.collections.FXCollections;
@@ -21,14 +24,15 @@ import javafx.util.Callback;
 import org.o7planning.javafx.model.ComboExtractor;
 import org.o7planning.javafx.model.ComboUrl;
 import org.o7planning.javafx.model.ExtractorList;
-import pdl1819_grp5.*;
 
 import java.io.*;
-import java.util.*;
-import java.util.function.Function;
-import java.util.logging.Level;
+import java.util.Date;
+import java.util.List;
+import java.util.Objects;
+import java.util.Set;
 
-import static pdl1819_grp5.wikiMain.getListofUrls;
+import static Extractor.wikiMain.getListofUrls;
+import static Extractor.wikiMain.mkCSVFileName;
 
 public class CsvEditor extends Application {
 
@@ -82,17 +86,17 @@ public class CsvEditor extends Application {
         labelExtract.setStyle(styles);
         root.getChildren().add(labelExtract);
 
-        TextField numTable = new TextField();
-        numTable.textProperty().addListener(new ChangeListener<String>() {
-            @Override
-            public void changed(ObservableValue<? extends String> observable, String oldValue,
-                                String newValue) {
-                if (!newValue.matches("\\d*")) {
-                    numTable.setText(newValue.replaceAll("[^\\d]", ""));
-                }
-            }
-        });
-        root.getChildren().add(numTable);
+//        TextField numTable = new TextField();
+//        numTable.textProperty().addListener(new ChangeListener<String>() {
+//            @Override
+//            public void changed(ObservableValue<? extends String> observable, String oldValue,
+//                                String newValue) {
+//                if (!newValue.matches("\\d*")) {
+//                    numTable.setText(newValue.replaceAll("[^\\d]", ""));
+//                }
+//            }
+//        });
+//        root.getChildren().add(numTable);
 
         //root2.getChildren().add(new Label("Select Extractor:"));
         //root1.getChildren().add(comboBox);
@@ -292,7 +296,7 @@ public class CsvEditor extends Application {
             deleteAllFiles(htmlDir);
             if (fileMatrices.size() > 0) {
                 for (FileMatrix f : fileMatrices) {
-                    csvFileName = wikiMain.mkCSVFileName(url.substring(url.lastIndexOf("/") + 1, url.length()), i);
+                    csvFileName = mkCSVFileName(url.substring(url.lastIndexOf("/") + 1, url.length()), i);
                     f.saveCsv(htmlDir.getAbsolutePath() + File.separator + csvFileName);
                     csvFile = csvFileName;
                     i++;
@@ -331,7 +335,7 @@ public class CsvEditor extends Application {
             deleteAllFiles(wikitextDir);
             if (fileMatrices.size() > 0) {
                 for (FileMatrix f : fileMatrices) {
-                    csvFileName = wikiMain.mkCSVFileName(url.substring(url.lastIndexOf("/") + 1, url.length()), i);
+                    csvFileName = mkCSVFileName(url.substring(url.lastIndexOf("/") + 1, url.length()), i);
                     f.saveCsv(wikitextDir.getAbsolutePath() + File.separator + csvFileName);
                     i++;
                 }

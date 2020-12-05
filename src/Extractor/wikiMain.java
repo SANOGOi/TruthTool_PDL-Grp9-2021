@@ -231,10 +231,10 @@ public class wikiMain {
     }
 
 
-    public static void main(String[] args) throws IOException {
-        wikiMain wikimain= new wikiMain();
-        wikimain.extracteurenmarche();
-
-
-    }
+//    public static void main(String[] args) throws IOException {
+//        wikiMain wikimain= new wikiMain();
+//        wikimain.extracteurenmarche();
+//
+//
+//    }
 }
