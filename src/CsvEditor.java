@@ -201,7 +201,6 @@ public class CsvEditor extends Application {
                             if (!csvFile.isEmpty()) {
                                 numberOfColumns = readCSV(csvFile);
                                 if (!dataList.isEmpty()) {
-                                    System.out.println("y");
                                     TableColumn[] tableColumns = new TableColumn[numberOfColumns];
                                     for (int i = 0; i < numberOfColumns; i++) {
                                         // Create a column. For the time being, the property number is the display name.
