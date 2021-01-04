@@ -167,6 +167,7 @@ public class CsvEditor extends Application {
                         emptyDirectory(outPut);
                         try {
                             writeData(urlCombo, pathInput);
+                            System.out.println("ok ça marche");
                             appelPythonExtract();
                             setComboNbrCsv(comboNbrCsv, pathOutput);
                         } catch (IOException e) {
@@ -279,7 +280,7 @@ public class CsvEditor extends Application {
 
     private void appelPythonExtract() throws IOException {
 
-        String PYTHON_OUTPUT  = "src/codePython.py";
+        String PYTHON_OUTPUT  = "src/main/java/codePython.py";
         Process p = Runtime.getRuntime().exec("python3 " + PYTHON_OUTPUT);
         // output
         BufferedReader stdInput = new BufferedReader(new InputStreamReader(p.getInputStream()));
