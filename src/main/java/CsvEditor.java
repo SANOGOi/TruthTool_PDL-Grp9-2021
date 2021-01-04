@@ -167,7 +167,6 @@ public class CsvEditor extends Application {
                         emptyDirectory(outPut);
                         try {
                             writeData(urlCombo, pathInput);
-                            System.out.println("ok ça marche");
                             appelPythonExtract();
                             setComboNbrCsv(comboNbrCsv, pathOutput);
                         } catch (IOException e) {
